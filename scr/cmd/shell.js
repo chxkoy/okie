@@ -3,7 +3,7 @@ module.exports.config = {
   name: "shell",
   description: "Run shell.",
   credits: "Deku",
-  usages: "[shell]",
+  usage: "[shell]",
   accessableby: 1,
   prefix: true
 }

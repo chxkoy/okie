@@ -2,8 +2,9 @@ module.exports = {
   config: {
     name: "gemini",
     accessibleby: 0,
-    author: "Deku", //https://facebook.com/joshg101
+    credits: "Deku", //https://facebook.com/joshg101
     description: "Talk to Gemini (conversational)",
+    usage: "[ask / clear / reply to an image with ask]",
     prefix: false,
     category: "AI",
   },

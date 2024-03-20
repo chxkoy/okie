@@ -23,18 +23,17 @@ module.exports = {
         for (let file of fs.readdirSync(__dirname).filter(file => file.endsWith('.js'))){
           if (file == "load.js") continue;
           let command = require(__dirname + `/${file}`);
-          if (command.akane.name == "load") continue;
           try {
 delete require.cache[require.resolve(__dirname + `/${file}`)];
             let newCommand = require(__dirname + `/${file}`);
             successCount++;
-            successCommand.push(newCommand.akane.name);
+            successCommand.push(newCommand.config.name);
             count += 1
-            msg += `Loaded ${count}.${newCommand.akane.name}\n`
+            msg += `Loaded ${count}.${newCommand.config.name}\n`
           } catch (e){
             errorCount++;
           failedCommand.push(file);
-            msg += `Failed to load ${count}.${newCommand.akane.name}\n`
+            msg += `Failed to load ${count}.${newCommand.config.name}\n`
           }
         }
         msg += `\nSuccessfully loaded ${successCount} command(s) sucessfully.\nFailed to load ${errorCount} command(s).\n\n${failedCommand.join(", ")}`;

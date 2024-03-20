@@ -29,7 +29,7 @@ module.exports = {
     const commandList = commands.slice(startIndex, endIndex);
     
     commandList.forEach((command, index) => {
-      output += `${startIndex + index + 1}. ${command.name}\nPrefix: ${command.prefix ? "Yes" : "No"}\nDescription: ${command.description || "No description"}\n\n`
+      output += `${startIndex + index + 1}. ${command.name}\nPrefix: ${command.prefix ? "Yes" : "No"}\nDescription: ${command.description || "No description"}\nUsage: ${command.usage || command.name}\n\n`
     })
     /*for (let i = startIndex; i < endIndex; i++) {
       let command = commands[i];
