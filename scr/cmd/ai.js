@@ -13,7 +13,7 @@ module.exports = {
     react('✨');
     try {
       const r = (await axios.get(`https://ai-tools.replit.app/gpt?prompt=${p}&uid=${uid}`)).data;
-      return reply(r.gpt4);
+      return reply(r.gpt4 + "\n\nNOTE: THIS AI IS CONVERSATIONAL SO IF YOU WANT TO RESET YOUR CONVERSATION WITH AI JUST TYPE “clear”");
     } catch (g) {
       return reply(g.message);
     }
