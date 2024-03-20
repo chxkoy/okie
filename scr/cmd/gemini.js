@@ -27,7 +27,7 @@ module.exports = {
         }
       }
       const rest = (await axios.get(api + "/gemini?prompt=" + prompt + "&uid=" + uid)).data;
-      return reply(rest.gemini)
+      return reply(rest.gemini+ "\n\nNOTE: THIS AI IS CONVERSATIONAL SO IF YOU WANT TO RESET YOUR CONVERSATION WITH AI TO GO BACK AGAIN TO THE BEGINNING  JUST TYPE “gemini clear”")
     } catch (e) {
       console.log(e);
       return reply(e.message);
