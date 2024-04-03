@@ -33,7 +33,6 @@ for (let files of fs.readdirSync(commandPath)) {
     }
   }
 }
-
 /* END */
 process.on("unhandledRejection", (error) => console.error(error));
 
@@ -72,7 +71,7 @@ logger('Contact: https://facebook.com/joshg101')
               reply("Command " + nam + " doesn't need a prefix.");
             }
             function yesPref(nam) {
-              reply("Command " + nam + "need a prefix.");
+              reply("Command " + nam + " need a prefix.");
             }
             let input = event.body;
             let args = input.split(" ");
@@ -95,12 +94,12 @@ logger('Contact: https://facebook.com/joshg101')
 
             //no prefix
             if (t == p + s?.name && s?.prefix == false) {
-              return yesPref(s.name);
+              return noPref(s.name);
             }
 
             //yes prefix
             if (t == s?.name && s?.prefix == true) {
-              return noPref(s?.name);
+              return yesPref(s?.name);
             }
 
             //permission
