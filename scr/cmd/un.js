@@ -1,4 +1,4 @@
-module.exports.akane = {
+module.exports.config = {
   name: "un",
   usage: "[reply]",
   accessableby: 0,
