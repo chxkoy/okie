@@ -1,6 +1,6 @@
 module.exports = {
   config: {
-    name: "id",
+    name: "uid",
     accessableby: 0,
     description: "Get user ID",
     usage: "id/reply/group/all",
