@@ -2,8 +2,9 @@
 
 var utils = require("../utils");
 var log = require("npmlog");
+var bluebird = require("bluebird");
 
-module.exports = function (http, api, ctx) {
+module.exports = function (defaultFuncs, api, ctx) {
   function handleUpload(image, callback) {
     var uploads = [];
 
@@ -13,29 +14,20 @@ module.exports = function (http, api, ctx) {
     };
 
     uploads.push(
-      http
-        .postFormData(
-          "https://upload.facebook.com/ajax/mercury/upload.php",
-          ctx.jar,
-          form,
-          {}
-        )
-        .then(utils.parseAndCheckLogin(ctx, http))
+      defaultFuncs
+        .postFormData("https://upload.facebook.com/ajax/mercury/upload.php", ctx.jar, form, {})
+        .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then(function (resData) {
-          if (resData.error) {
-            throw resData;
-          }
+          if (resData.error) throw resData;
 
           return resData.payload.metadata[0];
         })
     );
 
     // resolve all promises
-    Promise
+    bluebird
       .all(uploads)
-      .then(function (resData) {
-        callback(null, resData);
-      })
+      .then(resData => callback(null, resData))
       .catch(function (err) {
         log.error("handleUpload", err);
         return callback(err);
@@ -43,17 +35,7 @@ module.exports = function (http, api, ctx) {
   }
 
   return function changeGroupImage(image, threadID, callback) {
-    if (
-      !callback &&
-      (utils.getType(threadID) === "Function" ||
-        utils.getType(threadID) === "AsyncFunction")
-    ) {
-      throw { error: "please pass a threadID as a second argument." };
-    }
-
-    if (!utils.isReadableStream(image)) {
-      throw { error: "please pass a readable stream as a first argument." };
-    }
+    if (!callback && (utils.getType(threadID) === "Function" || utils.getType(threadID) === "AsyncFunction")) throw { error: "please pass a threadID as a second argument." };
 
     var resolveFunc = function () { };
     var rejectFunc = function () { };
@@ -64,9 +46,7 @@ module.exports = function (http, api, ctx) {
 
     if (!callback) {
       callback = function (err) {
-        if (err) {
-          return rejectFunc(err);
-        }
+        if (err) return rejectFunc(err);
         resolveFunc();
       };
     }
@@ -102,24 +82,23 @@ module.exports = function (http, api, ctx) {
     };
 
     handleUpload(image, function (err, payload) {
-      if (err) {
-        return callback(err);
-      }
+      if (err) return callback(err);
 
       form["thread_image_id"] = payload[0]["image_id"];
       form["thread_id"] = threadID;
 
-      http
+      defaultFuncs
         .post("https://www.facebook.com/messaging/set_thread_image/", ctx.jar, form)
-        .then(utils.parseAndCheckLogin(ctx, http))
+        .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then(function (resData) {
+          // check for errors here
           if (resData.error) throw resData;
           return callback();
         })
         .catch(function (err) {
           log.error("changeGroupImage", err);
           return callback(err);
-        })
+        });
     });
 
     return returnPromise;

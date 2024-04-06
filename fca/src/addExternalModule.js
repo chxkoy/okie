@@ -1,17 +1,16 @@
-'use strict';
+"use strict";
 
-var utils = require('../utils');
+const utils = require("../utils");
 
-module.exports = function (http, api, ctx) {
+module.exports = function (defaultFuncs, api, ctx) {
   return function addExternalModule(moduleObj) {
-    if (utils.getType(moduleObj) == 'Object') {
-      for (let name in moduleObj) {
-        if (utils.getType(moduleObj[name]) == 'Function') 
-          api[name] = moduleObj[name](http, api, ctx);
-        else 
-          throw new Error(`Item "${name}" in moduleObj must be a function, not ${utils.getType(moduleObj[name])}!`);
+    if (utils.getType(moduleObj) == "Object") {
+      for (let apiName in moduleObj) {
+        if (utils.getType(moduleObj[apiName]) == "Function") api[apiName] = moduleObj[apiName](defaultFuncs, api, ctx);
+        else throw new Error(`Item "${apiName}" in moduleObj must be a function, not ${utils.getType(moduleObj[apiName])}!`);
+
       }
-    } else
-      throw new Error(`moduleObj must be an object, not ` + utils.getType(moduleObj) + `!`);
-  }
-}
+    }
+    else throw new Error(`moduleObj must be an object, not ${utils.getType(moduleObj)}!`);
+  };
+};

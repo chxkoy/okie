@@ -1,54 +1,41 @@
-'use strict';
+"use strict";
 
-var utils = require('../utils.js');
-var log = require('npmlog');
+var utils = require("../utils");
+var log = require("npmlog");
 
-module.exports = function (http, api, ctx) {
-  return function httpPostFormData(url, form, qs, callback, notAPI) {
-    var cb;
+module.exports = function(defaultFuncs, api, ctx) {
+  return function httpPostFormData(url, form, callback) {
+    var resolveFunc = function(){};
+    var rejectFunc = function(){};
+
     var returnPromise = new Promise(function (resolve, reject) {
-      cb = (error, body) => body ? resolve(body) : reject(error);
+      resolveFunc = resolve;
+      rejectFunc = reject;
     });
 
-    if (typeof form == 'function') {
+    if (!callback && (utils.getType(form) == "Function" || utils.getType(form) == "AsyncFunction")) {
       callback = form;
-      form = {}
+      form = {};
     }
-    if (typeof form == 'boolean') {
-      notAPI = form;
-      form = {}
-    }
-    if (typeof qs == 'function') {
-      callback = qs;
-      qs = {}
-    }
-    if (typeof qs == 'boolean') {
-      notAPI = qs;
-      qs = {}
-    }
-    if (typeof callback == 'boolean') {
-      notAPI = callback;
-      callback = null;
-    }
-    if (typeof callback == 'function') 
-      cb = callback;
 
-    let mainPromise;
-    if (notAPI) 
-      mainPromise = utils.postFormData(url, ctx.jar, form, qs, ctx.globalOptions, ctx);
-    else 
-      mainPromise = http.postFormData(url, ctx.jar, form, qs);
+    form = form || {};
+    
+    
+    callback = callback || function(err, data) {
+        if (err) return rejectFunc(err);
+        resolveFunc(data);
+    };
 
-    mainPromise
-      .then(function (res) {
-        var body = res.body.toString();
-        return cb(null, body);
+    defaultFuncs
+      .postFormData(url, ctx.jar, form)
+      .then(function(resData) {
+        callback(null, resData.body.toString());
       })
-      .catch(function (err) {
-        log.error('httpPost', err);
-        return cb(err);
+      .catch(function(err) {
+        log.error("httpPostFormData", err);
+        return callback(err);
       });
 
     return returnPromise;
-  }
-}
+  };
+};

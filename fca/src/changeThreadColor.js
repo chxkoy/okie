@@ -14,17 +14,16 @@ module.exports = function (defaultFuncs, api, ctx) {
 
     if (!callback) {
       callback = function (err) {
-        if (err) {
-          return rejectFunc(err);
-        }
+        if (err) return rejectFunc(err);
         resolveFunc(err);
       };
     }
 
-    if (!isNaN(color)) {
-      color = color.toString();
-    }
     var validatedColor = color !== null ? color.toLowerCase() : color; // API only accepts lowercase letters in hex string
+    var colorList = Object.keys(api.threadColors).map(function (name) {
+      return api.threadColors[name];
+    });
+    if (!colorList.includes(validatedColor)) throw { error: "The color you are trying to use is not a valid thread color. Use api.threadColors to find acceptable values." };
 
     var form = {
       dpr: 1,
@@ -49,9 +48,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       .post("https://www.facebook.com/api/graphqlbatch/", ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function (resData) {
-        if (resData[resData.length - 1].error_results > 0) {
-          throw resData[0].o0.errors;
-        }
+        if (resData[resData.length - 1].error_results > 0) throw resData[0].o0.errors;
 
         return callback();
       })

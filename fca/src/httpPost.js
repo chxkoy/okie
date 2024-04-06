@@ -1,54 +1,48 @@
-'use strict';
+"use strict";
 
-var utils = require('../utils.js');
-var log = require('npmlog');
+var utils = require("../utils");
+var log = require("npmlog");
 
-module.exports = function (http, api, ctx) {
-  return function httpPost(url, form, customHeader, callback, notAPI) {
-    var cb;
+module.exports = function (defaultFuncs, api, ctx) {
+  return function httpGet(url, form, callback, notAPI) {
+    var resolveFunc = function () { };
+    var rejectFunc = function () { };
+
     var returnPromise = new Promise(function (resolve, reject) {
-      cb = (error, body) => body ? resolve(body) : reject(error);
+      resolveFunc = resolve;
+      rejectFunc = reject;
     });
 
-    if (typeof form == 'function') {
+    if (!callback && (utils.getType(form) == "Function" || utils.getType(form) == "AsyncFunction")) {
       callback = form;
-      form = {}
+      form = {};
     }
-    if (typeof form == 'boolean') {
-      notAPI = form;
-      form = {}
-    }
-    if (typeof customHeader == 'function') {
-      callback = customHeader;
-      customHeader = {}
-    }
-    if (typeof customHeader == 'boolean') {
-      notAPI = customHeader;
-      customHeader = {}
-    }
-    if (typeof callback == 'boolean') {
-      notAPI = callback;
-      callback = null;
-    }
-    if (typeof callback == 'function') 
-      cb = callback;
 
-    let mainPromise;
-    if (notAPI) 
-      mainPromise = utils.post(url, ctx.jar, form, ctx.globalOptions, ctx, customHeader);
-    else 
-      mainPromise = http.post(url, ctx.jar, form, null, null, customHeader);
+    form = form || {};
 
-    mainPromise
-      .then(function (res) {
-        var body = res.body.toString();
-        return cb(null, body);
-      })
-      .catch(function (err) {
-        log.error('httpPost', err);
-        return cb(err);
-      });
+    callback = callback || function (err, data) {
+      if (err) return rejectFunc(err);
+      resolveFunc(data);
+    };
 
+    if (notAPI) {
+      utils
+        .post(url, ctx.jar, form, ctx.globalOptions)
+        .then(resData => callback(null, resData.body.toString()))
+        .catch(function (err) {
+          log.error("httpPost", err);
+          return callback(err);
+        });
+    }
+    else {
+      defaultFuncs
+        .post(url, ctx.jar, form, {})
+        .then(resData => callback(null, resData.body.toString()))
+        .catch(function (err) {
+          log.error("httpPost", err);
+          return callback(err);
+        });
+    }
     return returnPromise;
-  }
-}
+  };
+};

@@ -116,6 +116,31 @@ logger('Contact: https://facebook.com/joshg101')
           } // end of file ends with .js
         } // end of loop file
       } // end of event body null
+     // welcome 
+      if (event.logMessagetype == "log:subscribe"){
+        const { threadID } = event;
+        let { threadName, participantIDs, imageSrc } = await api.getThreadInfo(threadID);
+        if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
+        const authorName = (await api.getUserInfo(event.author)).name;
+        api.changeNickname(`${global.deku.BOTNAME} • [ ${global.deku.PREFIX} ]`, event.threadID, api.getCurrentUserID());
+                     reply( `${global.midoriya.name} connected successfully!\nType "${global.midoriya.prefix}help" to view all commands\n\nContact the admin if you encounter an error.`);
+                /*---LOGS---*/
+        return api.sendMessage(`——[BOT LOGS]——\n\nBot has been added to a group.\n\nName: ${threadName || "Unnamed Group"}\n\nID: ${event.threadID}\n\nTotal of members: ${participantIDs.length}\n\nAdded by: ${authorName}\n\n[ f ]: https://facebook.com/${event.author}\n\n——[BOT LOGS]——`, global.deku.ADMINBOT[0]);
+                    } else {
+          try {
+            let addedParticipants1 = event.logMessageData.addedParticipants;
+             for (let newParticipant of addedParticipants1) {
+               let userID = newParticipant.userFbId
+               const name = (await api.getUserInfo(parseInt(userID))).name;
+               if (userID !== api.getCurrentUserID()) {
+                 api.shareContact(`Hello ${name}\nWelcome to ${threadName || "This Group"}\nYou're the ${participantIDs.length}th member on this group.\nEnjoy!`, userID, threadID)
+               }
+             }
+          } catch (e) {
+            return reply(e.message);
+          }
+                    }
+      }
     }); // end of listenMqtt
   },
 ); // end of X

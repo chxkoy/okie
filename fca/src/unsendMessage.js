@@ -3,35 +3,38 @@
 var utils = require("../utils");
 var log = require("npmlog");
 
-module.exports = function (http, api, ctx) {
+module.exports = function (defaultFuncs, api, ctx) {
   return function unsendMessage(messageID, callback) {
-    var cb;
-    var rt = new Promise(function (resolve, reject) {
-      cb = error => error ? reject(error) : resolve();
+    var resolveFunc = function () { };
+    var rejectFunc = function () { };
+    var returnPromise = new Promise(function (resolve, reject) {
+      resolveFunc = resolve;
+      rejectFunc = reject;
     });
 
-    if (typeof callback == 'function') cb = callback;
-    if (typeof messageID == 'function' || typeof messageID != 'string') {
-      var error = 'messageID must be string';
-      log.error('unsendMessage', error);
-      return typeof messageID == 'function' ? messageID(error) : cb(error);
+    if (!callback) {
+      callback = function (err, friendList) {
+        if (err) return rejectFunc(err);
+        resolveFunc(friendList);
+      };
     }
 
-    http
-      .post('https://www.facebook.com/messaging/unsend_message/', ctx.jar, {
-        message_id: messageID
-      })
-      .then(utils.parseAndCheckLogin(ctx, http))
-      .then(function (res) {
-        if (res.error)
-          throw res;
-        return cb();
+    var form = {
+      message_id: messageID
+    };
+
+    defaultFuncs
+      .post("https://www.facebook.com/messaging/unsend_message/", ctx.jar, form)
+      .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
+      .then(function (resData) {
+        if (resData.error) throw resData;
+        return callback();
       })
       .catch(function (err) {
-        log.error('unsendMessage', err);
-        return cb(err);
+        log.error("unsendMessage", err);
+        return callback(err);
       });
 
-    return rt;
-  }
-}
+    return returnPromise;
+  };
+};

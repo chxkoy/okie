@@ -3,88 +3,60 @@
 var utils = require("../utils");
 var log = require("npmlog");
 
-function format(res) {
-  var res = res.relay_rendering_strategy.view_model.profile;
+function formatData(data) {
   return {
-    userID: res.id,
-    name: res.name,
-    isVerified: res.is_verified,
-    profileUrl: res.url,
-    photoUrl: res.profile_picture.uri
-  }
+    userID: utils.formatID(data.uid.toString()),
+    photoUrl: data.photo,
+    indexRank: data.index_rank,
+    name: data.text,
+    isVerified: data.is_verified,
+    profileUrl: data.path,
+    category: data.category,
+    score: data.score,
+    type: data.type
+  };
 }
 
-module.exports = function (http, api, ctx) {
+module.exports = function (defaultFuncs, api, ctx) {
   return function getUserID(name, callback) {
-    var cb;
-    var rtPromise = new Promise(function (resolve, reject) {
-      cb = (error, data) => data ? resolve(data) : reject(error);
+    var resolveFunc = function () { };
+    var rejectFunc = function () { };
+    var returnPromise = new Promise(function (resolve, reject) {
+      resolveFunc = resolve;
+      rejectFunc = reject;
     });
 
-    if (typeof name == 'function') {
-      callback = name;
-      name = null;
-    }
-    if (typeof callback == 'function') cb = callback;
-    if (typeof name != 'string') {
-      log.error('getUserID', 'name must be string');
-      return cb('name must be string');
+    if (!callback) {
+      callback = function (err, data) {
+        if (err) return rejectFunc(err);
+        resolveFunc(data);
+      };
     }
 
     var form = {
-      fb_api_caller_class: 'RelayModern',
-      fb_api_req_friendly_name: 'SearchCometResultsInitialResultsQuery',
-      variables: JSON.stringify({
-        count: 5,
-        allow_streaming: false,
-        args: {
-          callsite: "COMET_GLOBAL_SEARCH",
-          config: {
-            exact_match: false,
-            high_confidence_config: null,
-            intercept_config: null,
-            sts_disambiguation: null,
-            watch_config: null
-          },
-          context: {
-            bsid: utils.getGUID(),
-            tsid: null
-          },
-          experience: {
-            encoded_server_defined_params: null,
-            fbid: null,
-            type: "PEOPLE_TAB"
-          },
-          filters: [],
-          text: name.toLowerCase()
-        },
-        cursor: null,
-        feedbackSource: 23,
-        fetch_filters: true,
-        renderLocation: "search_results_page",
-        scale: 1, 
-        stream_initial_count: 0,
-        useDefaultActor: false,
-        __relay_internal__pv__IsWorkUserrelayprovider: false,
-        __relay_internal__pv__IsMergQAPollsrelayprovider: false,
-        __relay_internal__pv__StoriesArmadilloReplyEnabledrelayprovider: false, 
-        __relay_internal__pv__StoriesRingrelayprovider: false
-      }),
-      doc_id: '9946783172059974'
-    }
+      value: name.toLowerCase(),
+      viewer: ctx.userID,
+      rsp: "search",
+      context: "search",
+      path: "/home.php",
+      request_id: utils.getGUID()
+    };
 
-    http
-      .post('https://www.facebook.com/api/graphql/', ctx.jar, form)
-      .then(utils.parseAndCheckLogin(ctx, http))
-      .then(function (res) {
-        if (res.error || res.errors) throw res;
-        return cb(null, res.data.serpResponse.results.edges.map(format));
+    defaultFuncs
+      .get("https://www.facebook.com/ajax/typeahead/search.php", ctx.jar, form)
+      .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
+      .then(function (resData) {
+        if (resData.error) throw resData;
+
+        var data = resData.payload.entries;
+
+        callback(null, data.map(formatData));
       })
       .catch(function (err) {
-        log.error('getUserID', err);
-        return cb(err);
+        log.error("getUserID", err);
+        return callback(err);
       });
 
-    return rtPromise;
-  }
-}
+    return returnPromise;
+  };
+};

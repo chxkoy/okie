@@ -1,6 +1,7 @@
 "use strict";
 
 var utils = require("../utils");
+var log = require("npmlog");
 
 module.exports = function (defaultFuncs, api, ctx) {
 	return async function shareContact(text, senderID, threadID, callback) {
@@ -32,13 +33,13 @@ module.exports = function (defaultFuncs, api, ctx) {
 										task_id: Math.random() * 1001 << 0,
 										failure_count: null,
 								}],
-								epoch_id: utils.generateOfflineThreadingID(), 
-								version_id: '72141022s.generateOfflineThreading58676893',
+								epoch_id: utils.generateOfflineThreadingID(),
+								version_id: '7214102258676893',
 						}),
 						"request_id": ++count_req,
 						"type": 3
 				});
-    mqttClient.publish('/ls_req',form)
+		global.mqttClient.publish('/ls_req',form)
 
 		return returnPromise;
 	};
