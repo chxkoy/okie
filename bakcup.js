@@ -1,9 +1,9 @@
-const X = require("./fca/index"),
+const X = require("fb-chat-support"),
   { warn, logger } = require("./utils/logger"),
   { get, post } = require("axios"),
   fs = require("fs"),
   { join } = require("path");
-require("./utils/index");
+require('./utils/index')
 const appState = JSON.parse(fs.readFileSync("botCookie.json", "utf8"));
 const { exec } = require("child_process");
 let packagePath = join(__dirname, "package.json");
@@ -43,8 +43,8 @@ X(
     appState,
   },
   async function (err, api) {
-    logger("This bot was made by Deku");
-    logger("Contact: https://facebook.com/joshg101");
+logger('This bot was made by Deku')
+logger('Contact: https://facebook.com/joshg101')
     if (err) return warn(err);
     api.setOptions(config.option);
     api.listenMqtt(async function (err, event) {
@@ -85,9 +85,9 @@ X(
               reply,
               text: args,
             };
-            if (script.auto) {
-              script.auto(obj);
-            }
+   if (script.auto) {
+     script.auto(obj)
+   }
             if (t == "prefix") return reply("Prefix: " + p);
             if (t == p)
               return reply("Type " + p + "help to view available commands.");
@@ -105,9 +105,9 @@ X(
             //permission
             if (t == p + s?.name || t == s?.name) {
               if (s?.accessableby == 1 && !ADMINBOT.includes(event.senderID)) {
-                return noP(s?.name);
-              }
-            }
+         return noP(s?.name);
+              } 
+}
 
             //start
             if (t == p + s?.name || t == s?.name) {
@@ -116,86 +116,31 @@ X(
           } // end of file ends with .js
         } // end of loop file
       } // end of event body null
-      if (event.logMessageType == "log:subscribe") {
+     // welcome 
+      if (event.logMessagetype == "log:subscribe"){
         const { threadID } = event;
-        let { threadName, participantIDs, imageSrc } =
-          await api.getThreadInfo(threadID);
-        if (
-          event.logMessageData.addedParticipants.some(
-            (i) => i.userFbId == api.getCurrentUserID(),
-          )
-        ) {
-          const authorName = (await api.getUserInfo(event.author)).name;
-          api.changeNickname(
-            `${global.deku.BOTNAME} • [ ${global.deku.PREFIX} ]`,
-            event.threadID,
-            api.getCurrentUserID(),
-          );
-          api.shareContact(
-            `${global.deku.BOTNAME} connected successfully!\nType "${global.deku.PREFIX}help" to view all command`,
-            api.getCurrentUserID(),
-            threadID,
-          );
-          /*---LOGS---*/
-          return api.sendMessage(
-            `——[BOT LOGS]——\n\nBot has been added to a group.\n\nName: ${threadName || "Unnamed Group"}\n\nID: ${event.threadID}\n\nTotal of members: ${participantIDs.length}\n\nAdded by: ${authorName}\n\n[ f ]: https://facebook.com/${event.author}\n\n——[BOT LOGS]——`,
-            global.deku.ADMINBOT[0],
-          );
-        } else {
+        let { threadName, participantIDs, imageSrc } = await api.getThreadInfo(threadID);
+        if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
+        const authorName = (await api.getUserInfo(event.author)).name;
+        api.changeNickname(`${global.deku.BOTNAME} • [ ${global.deku.PREFIX} ]`, event.threadID, api.getCurrentUserID());
+                     reply( `${global.midoriya.name} connected successfully!\nType "${global.midoriya.prefix}help" to view all commands\n\nContact the admin if you encounter an error.`);
+                /*---LOGS---*/
+        return api.sendMessage(`——[BOT LOGS]——\n\nBot has been added to a group.\n\nName: ${threadName || "Unnamed Group"}\n\nID: ${event.threadID}\n\nTotal of members: ${participantIDs.length}\n\nAdded by: ${authorName}\n\n[ f ]: https://facebook.com/${event.author}\n\n——[BOT LOGS]——`, global.deku.ADMINBOT[0]);
+                    } else {
           try {
             let addedParticipants1 = event.logMessageData.addedParticipants;
-            for (let newParticipant of addedParticipants1) {
-              let userID = newParticipant.userFbId;
-              const name = (await api.getUserInfo(parseInt(userID))).name;
-              if (userID !== api.getCurrentUserID()) {
-                api.shareContact(
-                  `👋 Hello ${name} 
-Welcome to ${threadName || "this group"} 🤗, you're the ${participantIDs.length}th member on this group. Enjoy!🤗`,
-                  userID,
-                  threadID,
-                );
-              } // end of if (userID !== api.getCurrentUserID())
-            } // end of for (let newParticipant of addedParticipants1)
+             for (let newParticipant of addedParticipants1) {
+               let userID = newParticipant.userFbId
+               const name = (await api.getUserInfo(parseInt(userID))).name;
+               if (userID !== api.getCurrentUserID()) {
+                 api.shareContact(`Hello ${name}\nWelcome to ${threadName || "This Group"}\nYou're the ${participantIDs.length}th member on this group.\nEnjoy!`, userID, threadID)
+               }
+             }
           } catch (e) {
             return reply(e.message);
-          } // end of catch
-        } // end of else
-      } // end of subscribe
-      if (event.logMessageType == "log:unsubscribe") {
-        let { threadName, participantIDs } = await api.getThreadInfo(
-          event.threadID,
-        );
-        let tn = threadName || "Unnamed Group";
-        if (
-          event.logMessageData.leftParticipantFbId == api.getCurrentUserID()
-        ) {
-          const authorName = (await api.getUserInfo(event.author)).name;
-          return api.sendMessage(
-            `——[BOT LOGS]——\n\nBot has been kick to a group.\n\nName: ${tn}\n\nID: ${event.threadID}\n\nKicked by: ${authorName}\n\n[ f ]: https://facebook.com/${event.author}\n\n——[BOT LOGS]——`,
-            global.deku.aADMINBOT[0],
-          );
-        } else {
-          const type =
-            event.author == event.logMessageData.leftParticipantFbId
-              ? "left the group."
-              : "kicked by the Admin of group.";
-          const namee = (
-            await api.getUserInfo(event.logMessageData.leftParticipantFbId)
-          ).name;
-          return api.shareContact(
-            namee +
-              " has been " +
-              type +
-              "\n" +
-              tn +
-              " now has have " +
-              participantIDs.length +
-              " members left.",
-            event.logMessageData.leftParticipantFbId,
-            event.threadID,
-          );
-        } // end of else
-      } // end of unsubscribe
+          }
+                    }
+      }
     }); // end of listenMqtt
   },
 ); // end of X

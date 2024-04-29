@@ -12,7 +12,7 @@ module.exports = {
     if (!p) return reply('Please enter a prompt.');
     react('✨');
     try {
-      const r = (await axios.get(`https://ai-tools.replit.app/gpt?prompt=${p}&uid=${uid}`)).data;
+      const r = (await axios.get(`https://deku-rest-api.replit.app/gpt4?prompt=${p}&uid=${uid}`)).data;
       return reply(r.gpt4 + "\n\nNOTE: THIS AI IS CONVERSATIONAL SO IF YOU WANT TO RESET YOUR CONVERSATION WITH AI TO GO BACK AGAIN TO THE BEGINNING  JUST TYPE “ai clear”");
     } catch (g) {
       return reply(g.message);

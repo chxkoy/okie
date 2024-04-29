@@ -54,7 +54,7 @@ module.exports = {
       examples.push(fs.createReadStream(path));
       }
       return reply({
-        body: warn + "\nTry to use " + this.akane.name + " " + this.akane.usages+"\n\nHere's the example of ephoto, textpro, and photooxy", attachment: examples});
+        body: warn + "\nTry to use " + this.config.name + " " + this.config.usage+"\n\nHere's the example of ephoto, textpro, and photooxy", attachment: examples});
     }
       if (textt == "list") {
         msg += "LIST OF AVAILABLE TYPES\n\n";

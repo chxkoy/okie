@@ -6,11 +6,13 @@ module.exports = {
     prefix: true
   },
   start: async function ({text, reply}) {
-    const fs = require("fs")
+    const fs = require("fs"), axios = require("axios");
+      try {
+    let path2 = __dirname + "/cache/images.png";
     let path = process.cwd() + "/scr/cmd";
     let files = fs.readdirSync(path);
     let commands = [];
-    let page = 1;
+    let page = text[0] || 1;
     
     if (text[0]) {
       if (page < 1) return reply("Invalid page number.")
@@ -25,6 +27,14 @@ module.exports = {
     if (page > totalPages) return reply("Invalid page number.");
     let startIndex = (page - 1) * 10;
     let endIndex = page * 10;
+          /*const rest = (await axios.get("https://api.waifu.pics/sfw/waifu")).data
+          const url = rest.url
+     const img = (
+        await axios.get(url, {
+          responseType: "arraybuffer",
+        })
+      ).data;
+      fs.writeFileSync(path2, Buffer.from(img, "utf-8"));*/
     let output = "·•——[ COMMAND LIST ]——•·\n\n";
     const commandList = commands.slice(startIndex, endIndex);
     
@@ -38,6 +48,9 @@ module.exports = {
     }*/
     output += `Page ${page} of ${totalPages}\n`
     output += `\n·•——[ COMMAND LIST ]——•·`;
-    reply(output)
+     return reply({body:output})
+      } catch (e) {
+          return reply(e.message)
+      }
   }
 }

@@ -7,7 +7,7 @@ module.exports = {
     prefix: false,
     credits: "Deku"
   },
-  start: async function ({ text, reply, event }) {
+  start: async function ({ text, reply, event, api }) {
     let id;
     if (!text[0]) {
       id = event.senderID
@@ -29,8 +29,10 @@ module.exports = {
       return reply(m)
     }
     if (t == "-g" || t == "group") {
-      id = event.senderID
+      id = event.threadID
+       return reply(id)
     }
-    return reply(id)
+    return api.shareContact(id, id, event.threadID)
+
   }
 }

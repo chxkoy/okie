@@ -1,4 +1,4 @@
-module.exports.akane = {
+module.exports.config = {
   name: "noti",
   prefix: true,
   accessableby: 1,

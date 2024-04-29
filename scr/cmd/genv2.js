@@ -71,7 +71,7 @@ module.exports = {
 
         "[ AVAILABLE TYPE ]\n\n1. SDXL\n2. EMI\n3. PIXART\n4. DALL-E\n5. Render 3D\n\nUse: " +
 
-        this.akane.name +
+        this.config.name +
 
         " type (1-4) | prompt | style (1-9) (if needed)\n\n[ AVAILABLE IMAGE STYLES ]\n\nSDXL\n1. Cinematic\n2. Photographic\n3. Anime\n4. Manga\n5. Digital Art\n6. Pixel art\n7. Fantasy art\n8. Neonpunk\n9. 3D Model\n\nPIXART\n1. Cinematic\n2. Photographic\n3. Anime\n4. Manga\n5. Digital Art\n6. Pixel art\n7. Fantasy art\n8. Neonpunk\n9. 3D Model";
 
